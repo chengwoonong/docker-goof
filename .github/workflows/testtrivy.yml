@@ -3,7 +3,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: testtrivy
+name: Testtrivy
 
 on:
   push:
@@ -39,6 +39,7 @@ jobs:
           image-ref: 'docker.io/cwongsgp/docker-goof:${{ github.sha }}'
           format: 'template'
           template: '@/contrib/sarif.tpl'
+          exit-code: '1'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
 
