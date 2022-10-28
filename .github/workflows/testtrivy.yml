@@ -1,7 +1,7 @@
 # This workflow uses actions that are not certified by GitHub.
 # They are provided by a third-party and are governed by
 # separate terms of service, privacy policy, and support
-# documentation.
+# documentation. test
 
 name: Testtrivy
 
@@ -31,14 +31,13 @@ jobs:
 
       - name: Build an image from Dockerfile
         run: |
-          docker build -t docker.io/cwongsgp/docker-goof:${{ github.sha }} .
+          docker build -t docker.io/${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKER_HUB_REPOSITORY}}:${{ github.sha }} .
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
         with:
-          image-ref: 'docker.io/cwongsgp/docker-goof:${{ github.sha }}'
-          format: 'template'
-          template: '@/contrib/sarif.tpl'
+          image-ref: 'docker.io/${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKER_HUB_REPOSITORY}}:${{ github.sha }}'
+          format: 'sarif'
           exit-code: '1'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
@@ -48,3 +47,15 @@ jobs:
         if: always()
         with:
           sarif_file: 'trivy-results.sarif'
+      -
+        name: Login to DockerHub
+        uses: docker/login-action@v2 
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: ${{secrets.DOCKERHUB_USERNAME}}/${{secrets.DOCKER_HUB_REPOSITORY}}:latest
